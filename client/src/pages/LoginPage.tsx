@@ -47,6 +47,7 @@ const LoginPage = () => {
               </label>
               <input
                 type="email"
+                name="email"
                 className="bg-gray-700 border border-gray-600 placeholder-gray-400
                 text-white focus:ring focus:ring-amber-500 focus:border-amber-500 w-full p-2.5
                 rounded-lg sm:text-sm hover:bg-gray-600"
@@ -63,6 +64,7 @@ const LoginPage = () => {
               </label>
               <input
                 type="password"
+                name="password"
                 className="bg-gray-700 border border-gray-600 placeholder-gray-400
                 text-white focus:ring focus:ring-amber-500 focus:border-amber-500 w-full p-2.5
                 rounded-lg sm:text-sm hover:bg-gray-600"

@@ -70,7 +70,8 @@ export const userSignUp = async (req: Request, res: Response, next: NextFunction
                     signed: true
                 })
                 return res.status(201).json({
-                    user: user,
+                    name: user.name,
+                    email: user.email,
                     msg: "User created successfully",
                     status: 201
                 })
@@ -130,6 +131,38 @@ export const userSignIn = async (req: Request, res: Response, next:NextFunction)
             status: 200
         })
 
+    } catch ( error: any ) {
+        console.error(error);
+        return res.status(500).json({
+            msg: "Internal Server Error",
+            error: error.message,
+            status: 500
+        })
+    }
+}
+
+export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await User.findById(res.locals.jwtData.id);
+        if (!user) {
+            return res.status(404).json({
+                msg: `User ${res.locals.jwtData.id} not found`,
+                status: 404
+            })
+        }
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            return res.status(401).json({
+                msg: "Permission denied",
+                status: 401
+            })
+        }
+        return res.status(200).json({
+            userId: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            msg: "User verified successfully",
+            status: 200
+        })
     } catch ( error: any ) {
         console.error(error);
         return res.status(500).json({

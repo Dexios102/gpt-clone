@@ -5,7 +5,7 @@ import {
   useEffect,
   useContext,
 } from "react";
-import { loginUserAPI } from "../helpers/apiConnection";
+import { checkAuthAPI, loginUserAPI } from "../helpers/apiConnection";
 
 type User = {
   name: string;
@@ -26,7 +26,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    async function checkAuthStatus() {
+      const data = await checkAuthAPI();
+      if (data) {
+        setUser({ email: data.email, name: data.name });
+        setIsLoggedIn(true);
+      }
+    }
+    checkAuthStatus();
+  }, []);
 
   const signin = async (email: string, password: string) => {
     const data = await loginUserAPI(email, password);
@@ -35,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoggedIn(true);
     }
   };
-  const signup = async (name: string, email: string, password: string) => {};
+  const signup = async () => {};
   const logout = async () => {};
 
   const value = {
@@ -49,4 +58,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
