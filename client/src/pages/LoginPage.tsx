@@ -1,12 +1,23 @@
 import { Link } from "react-router-dom";
 import mainLogo from "../assets/logo.svg";
+import { toast } from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 const LoginPage = () => {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const auth = useAuth();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = formData.get("email");
-    const password = formData.get("password");
-    console.log(email, password);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    try {
+      toast.loading("Logging in...", { id: "signin" });
+      await auth?.signin(email, password);
+      toast.success("Logged in successfully", { id: "signin" });
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to login", { id: "signin" });
+    }
   };
 
   return (
@@ -51,7 +62,7 @@ const LoginPage = () => {
                 Password
               </label>
               <input
-                type="email"
+                type="password"
                 className="bg-gray-700 border border-gray-600 placeholder-gray-400
                 text-white focus:ring focus:ring-amber-500 focus:border-amber-500 w-full p-2.5
                 rounded-lg sm:text-sm hover:bg-gray-600"

@@ -125,6 +125,7 @@ export const userSignIn = async (req: Request, res: Response, next:NextFunction)
         return res.status(200).json({
             userId: user._id.toString(),
             name: user.name,
+            email: user.email,
             msg: "User logged in successfully",
             status: 200
         })

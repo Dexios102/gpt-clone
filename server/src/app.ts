@@ -9,7 +9,7 @@ const app = express();
 
 /* CORS Option */
 var corsOptions = {
-    origin: true,
+    origin: `http://localhost:${process.env.CLIENT_PORT}`,
     credentials: true,
     optionSuccessStatus: 200
 }

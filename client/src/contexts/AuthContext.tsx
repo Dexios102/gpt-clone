@@ -5,6 +5,7 @@ import {
   useEffect,
   useContext,
 } from "react";
+import { loginUserAPI } from "../helpers/apiConnection";
 
 type User = {
   name: string;
@@ -27,7 +28,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {}, []);
 
-  const signin = async (email: string, password: string) => {};
+  const signin = async (email: string, password: string) => {
+    const data = await loginUserAPI(email, password);
+    if (data) {
+      setUser({ email: data.email, name: data.name });
+      setIsLoggedIn(true);
+    }
+  };
   const signup = async (name: string, email: string, password: string) => {};
   const logout = async () => {};
 
