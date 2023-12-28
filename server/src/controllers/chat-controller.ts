@@ -6,16 +6,49 @@ export const generateChatCompletion = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { message } = req.body;
+  const { message, maxSentencesResponse } = req.body;
   try {
+    console.log("Finding user...");
+    const user = await User.findById(res.locals.jwtData.id);
+    if (!user) {
+      console.log("User not found or token malfunctioned");
+      return res
+        .status(401)
+        .json({ message: "User not registered OR Token malfunctioned" });
+    }
+    console.log("User found, processing chats...");
+    const userChats = user.chats.map(({ role, content }) => ({
+      role,
+      content,
+    })) as { role: string; content: string }[];
+    userChats.push({ role: "user", content: message });
+    user.chats.push({ role: "user", content: message });
+    console.log("Generating chat completion...");
     const openAI = openaiConfig();
+    const maxSentenceRule =
+      "Response must contain at most " + maxSentencesResponse + " sentences";
     const chatCompletion = await openAI.chat.completions.create({
-      messages: [{ role: "user", content: message }],
+      messages: [{ role: "user", content: message + " " + maxSentenceRule }],
       model: "gpt-3.5-turbo",
     });
+    let assistantMessage = chatCompletion.choices[0].message.content;
+    if (assistantMessage !== null) {
+      let sentences = assistantMessage.split(". ");
+      if (sentences.length > maxSentencesResponse) {
+        sentences = sentences.slice(0, maxSentencesResponse);
+        assistantMessage = sentences.join(". ") + ".";
+      }
+    }
+    user.chats.push({
+      role: "assistant",
+      content: assistantMessage,
+    });
+    console.log("Saving user...");
+    await user.save();
+    console.log("User chats saved successfully");
     return res.status(200).json({ message: "OK", chat: chatCompletion });
   } catch (error: any) {
-    console.log(error);
+    console.log("An error occurred:", error);
     return res.status(200).json({ message: "ERROR", cause: error.message });
   }
 };
