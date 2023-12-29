@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../models/User.js";
 import { openaiConfig } from "../config/openai-config";
+import { aiJailbreak } from "../utils/aiJailbreak.js";
 export const generateChatCompletion = async (
   req: Request,
   res: Response,
@@ -23,25 +24,19 @@ export const generateChatCompletion = async (
     })) as { role: string; content: string }[];
     userChats.push({ role: "user", content: message });
     user.chats.push({ role: "user", content: message });
+
     console.log("Generating chat completion...");
     const openAI = openaiConfig();
     const maxSentenceRule =
       "Response must contain at most " + maxSentencesResponse + " sentences";
+    const rules = [maxSentenceRule, aiJailbreak].join(" \n");
     const chatCompletion = await openAI.chat.completions.create({
-      messages: [{ role: "user", content: message + " " + maxSentenceRule }],
+      messages: [{ role: "user", content: rules + " " + message }],
       model: "gpt-3.5-turbo",
     });
-    let assistantMessage = chatCompletion.choices[0].message.content;
-    if (assistantMessage !== null) {
-      let sentences = assistantMessage.split(". ");
-      if (sentences.length > maxSentencesResponse) {
-        sentences = sentences.slice(0, maxSentencesResponse);
-        assistantMessage = sentences.join(". ") + ".";
-      }
-    }
     user.chats.push({
       role: "assistant",
-      content: assistantMessage,
+      content: chatCompletion.choices[0].message.content,
     });
     console.log("Saving user...");
     await user.save();
