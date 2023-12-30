@@ -10,8 +10,8 @@ import {
 const chatRoutes = Router();
 chatRoutes.post(
   "/generate",
-  /* validate(messageValidator),
-  verifyToken, */
+  validate(messageValidator),
+  verifyToken,
   generateChatCompletion
 );
 chatRoutes.get("/all-chats", verifyToken, sendChatsToUser);

@@ -1,21 +1,49 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../models/User.js";
 import { openaiConfig } from "../config/openai-config";
+import { aiJailbreak } from "../utils/aiJailbreak.js";
 export const generateChatCompletion = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { message } = req.body;
+  const { message, maxSentencesResponse } = req.body;
   try {
+    console.log("Finding user...");
+    const user = await User.findById(res.locals.jwtData.id);
+    if (!user) {
+      console.log("User not found or token malfunctioned");
+      return res
+        .status(401)
+        .json({ message: "User not registered OR Token malfunctioned" });
+    }
+    console.log("User found, processing chats...");
+    const userChats = user.chats.map(({ role, content }) => ({
+      role,
+      content,
+    })) as { role: string; content: string }[];
+    userChats.push({ role: "user", content: message });
+    user.chats.push({ role: "user", content: message });
+
+    console.log("Generating chat completion...");
     const openAI = openaiConfig();
+    const maxSentenceRule =
+      "Response must contain at most " + maxSentencesResponse + " sentences";
+    const rules = [maxSentenceRule, aiJailbreak].join(" \n");
     const chatCompletion = await openAI.chat.completions.create({
-      messages: [{ role: "user", content: message }],
+      messages: [{ role: "user", content: rules + " " + message }],
       model: "gpt-3.5-turbo",
     });
+    user.chats.push({
+      role: "assistant",
+      content: chatCompletion.choices[0].message.content,
+    });
+    console.log("Saving user...");
+    await user.save();
+    console.log("User chats saved successfully");
     return res.status(200).json({ message: "OK", chat: chatCompletion });
   } catch (error: any) {
-    console.log(error);
+    console.log("An error occurred:", error);
     return res.status(200).json({ message: "ERROR", cause: error.message });
   }
 };
