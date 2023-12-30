@@ -4,11 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "dev": "concurrently \"npm run start-server\" \"npm run start-client\"",
+    "start-client": "cd .. && cd client && npm run dev",
+    "start-server": "concurrently \"npm run watch-ts\" \"npm run start-server-only\"",
+    "watch-ts": "tsc --watch",
+    "start-server-only": "nodemon -q dist/index.js",
+    "build": "tsc && cd client && npm install && npm run build",
+    "start": "npm run build && node -q dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  }
+  ,
   "keywords": [],
   "author": "",
   "license": "ISC",
