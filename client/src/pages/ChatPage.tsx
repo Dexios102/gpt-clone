@@ -6,8 +6,8 @@ import { FaUnlockAlt } from "react-icons/fa";
 
 const ChatPage = () => {
   return (
-    <section className="flex justify-between mx-10 gap-10 mt-4">
-      <div className="w-1/4 h-full">
+    <section className="flex justify-between mx-10 gap-6 mt-4">
+      <div className="w-1/4">
         <div className="rounded-xl px-4 py-4 bg-[#00171f] shadow-sm shadow-gray-800 mb-4">
           <div className="flex flex-row items-center gap-4">
             <div className="rounded-full shadow-lg shadow-gray-500/50">
@@ -30,7 +30,7 @@ const ChatPage = () => {
         </div>
         <div
           className="rounded-xl px-4 py-4 bg-[#00171f] shadow-sm shadow-gray-800 mb-4
-        h-[70vh]"
+        min-h-[70vh] overflow-y-auto"
         >
           <div className="inline-flex items-center justify-between w-full">
             <span className="text-gray-400 border-l-2 border-amber-600 pl-2 text-sm">
